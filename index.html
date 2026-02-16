@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JF1337</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet" />
+  <link rel="icon" href="icon.ico" type="image/png" />
+</head>
+
+<body>
+  <audio id="bg-music" loop preload="metadata">
+    <source src="music disk.flac" type="audio/flac" />
+  </audio>
+
+  <button id="music-btn" class="music-btn is-off" type="button" aria-label="toggle music">
+    <span class="label label-on">Music: ON</span>
+    <span class="label label-off">Music: OFF</span>
+  </button>
+
+  <div class="music-controls" id="music-controls">
+    <div class="row">
+      <span id="curTime">0:00</span>
+      <input id="progress" type="range" min="0" max="100" value="0" step="0.1" aria-label="music progress" />
+      <span id="durTime">0:00</span>
+    </div>
+
+    <div class="row volume-row">
+      <span>🔈</span>
+      <input id="volume" type="range" min="0" max="1" value="1" step="0.01" aria-label="volume" />
+      <span>🔊</span>
+    </div>
+  </div>
+  <video id="background-video" autoplay muted loop playsinline>
+    <source src="wallpaper1.mp4" type="video/mp4" />
+  </video>
+  <div class="card">
+    <img src="avatar.png" class="avatar" alt="Avatar" />
+
+    <h1 class="title">Welcome to ジャンクフード1337's official website</h1>
+    <h2 class="subtitle">I'll introduce myself?</h2>
+
+    <h2 class="introduction">👤 About Me</h2>
+
+    <h3 class="section-title">1. Hobbies</h3>
+    <p class="section-text">hobbies? Nah, I just wanna lie on my cozy bed.</p>
+
+    <h3 class="section-title">2. Skills</h3>
+    <p class="section-text">I can play a nice HvH game on my dogshit laptop with 30 FPS?</p>
+
+    <h3 class="section-title">3. Motto</h3>
+    <p class="del-one">Eat junk food, stay up late, and cheat in games.</p>
+    <p class="section-text">Trust in urself, u are the best!</p>
+
+    <h2 class="section-title">📬 Contact</h2>
+
+    <div class="contact-grid">
+      <div class="contact-box">
+        <span class="contact-label">QQ:</span>
+        <span class="contact-value">2073095729</span>
+      </div>
+
+      <div class="contact-box">
+        <span class="contact-label">Email:</span>
+        <span class="contact-value">yzxdsb123@gmail.com</span>
+      </div>
+
+      <div class="contact-box">
+        <span class="contact-label">Discord:</span>
+        <span class="contact-value">yyyuuu_38459</span>
+      </div>
+    </div>
+    <div class="extra-section">
+      <button id="fmi-btn" class="fmi-btn" type="button">
+        For More Information
+        <span class="arrow">▼</span>
+      </button>
+      <div id="extra-content" class="extra-content" aria-hidden="true">
+        <a class="BL"
+           href="https://space.bilibili.com/391436861/upload/video"
+           target="_blank"
+           rel="noopener noreferrer">
+          Click here to visit my Bilibili channel
+        </a>
+      </div>
+    </div>
+  </div>
+  <div id="subtitleBox" class="subtitle-box hidden">
+    <span id="subtitleText"></span>
+  </div>
+
+  <footer class="footer">
+    © <span id="year"></span> JF1337
+  </footer>
+
+  <script>
+    const music = document.getElementById("bg-music");
+    const btn = document.getElementById("music-btn");
+
+    const subtitleBox = document.getElementById("subtitleBox");
+    const subtitleText = document.getElementById("subtitleText");
+
+    const progress = document.getElementById("progress");
+    const volume = document.getElementById("volume");
+    const curTime = document.getElementById("curTime");
+    const durTime = document.getElementById("durTime");
+
+    const fmiBtn = document.getElementById("fmi-btn");
+    const extraContent = document.getElementById("extra-content");
+    const arrow = document.querySelector(".arrow");
+
+    document.getElementById("year").textContent = new Date().getFullYear();
+    let isPlaying = false;
+    let lastLine = "";
+    let isSeeking = false;
+    const subs = [
+      { start: 0.0, end: 4.5, text: "此歌曲為沒有填詞的純音樂，請您欣賞" },
+      { start: 4.5, end: 9.0, text: "Music brings the page to life." },
+      { start: 9.0, end: 195.0, text: "Enjoy :P" },
+    ];
+
+    function fmt(t) {
+      if (!isFinite(t)) return "0:00";
+      const m = Math.floor(t / 60);
+      const s = Math.floor(t % 60);
+      return `${m}:${String(s).padStart(2, "0")}`;
+    }
+
+    function setSubtitleSmooth(text) {
+      if (text === lastLine) return;
+      lastLine = text;
+
+      subtitleText.classList.add("fading");
+      setTimeout(() => {
+        subtitleText.textContent = text;
+        subtitleText.classList.remove("fading");
+      }, 180);
+    }
+
+    function updateSubtitle(time) {
+      const line = subs.find(s => time >= s.start && time < s.end);
+      if (line) {
+        subtitleBox.classList.remove("hidden");
+        setSubtitleSmooth(line.text);
+      } else {
+        subtitleBox.classList.add("hidden");
+        lastLine = "";
+      }
+    }
+    function fadeTo(target, duration = 500) {
+      const start = music.volume;
+      const startTime = performance.now();
+      target = Math.max(0, Math.min(1, target));
+
+      function tick(now) {
+        const t = Math.min(1, (now - startTime) / duration);
+        music.volume = start + (target - start) * t;
+        if (t < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+    const savedVol = localStorage.getItem("vol");
+    if (savedVol !== null) {
+      volume.value = savedVol;
+      music.volume = Number(savedVol);
+    } else {
+      music.volume = Number(volume.value);
+    }
+
+    volume.addEventListener("input", () => {
+      const v = Number(volume.value);
+      music.volume = v;
+      localStorage.setItem("vol", String(v));
+    });
+    music.addEventListener("loadedmetadata", () => {
+      durTime.textContent = fmt(music.duration);
+    });
+    progress.addEventListener("input", () => {
+      if (!music.duration) return;
+      isSeeking = true;
+      const t = (Number(progress.value) / 100) * music.duration;
+      curTime.textContent = fmt(t);
+    });
+
+    progress.addEventListener("change", () => {
+      if (!music.duration) return;
+      const t = (Number(progress.value) / 100) * music.duration;
+      music.currentTime = t;
+      isSeeking = false;
+      if (isPlaying) updateSubtitle(music.currentTime);
+    });
+    music.addEventListener("timeupdate", () => {
+      if (isPlaying) updateSubtitle(music.currentTime);
+
+      if (!music.duration) return;
+
+      if (!isSeeking) {
+        const p = (music.currentTime / music.duration) * 100;
+        progress.value = p;
+      }
+      curTime.textContent = fmt(music.currentTime);
+    });
+
+    music.addEventListener("ended", () => {
+      isPlaying = false;
+      btn.classList.remove("is-on");
+      btn.classList.add("is-off");
+      subtitleBox.classList.add("hidden");
+      progress.value = 0;
+      curTime.textContent = "0:00";
+    });
+    btn.addEventListener("click", async () => {
+      try {
+        if (!isPlaying) {
+          await music.play();
+          isPlaying = true;
+          btn.classList.remove("is-off");
+          btn.classList.add("is-on");
+          fadeTo(Number(volume.value), 600);
+        } else {
+          isPlaying = false;
+          btn.classList.remove("is-on");
+          btn.classList.add("is-off");
+          fadeTo(0, 400);
+          setTimeout(() => music.pause(), 420);
+          subtitleBox.classList.add("hidden");
+        }
+      } catch (e) {
+        console.log("Play blocked:", e);
+      }
+    });
+    extraContent.style.maxHeight = "0";
+    extraContent.setAttribute("aria-hidden", "true");
+
+    fmiBtn.addEventListener("click", () => {
+      extraContent.classList.toggle("show");
+      arrow.classList.toggle("rotate");
+
+      if (extraContent.classList.contains("show")) {
+        extraContent.style.maxHeight = extraContent.scrollHeight + "px";
+        extraContent.setAttribute("aria-hidden", "false");
+      } else {
+        extraContent.style.maxHeight = "0";
+        extraContent.setAttribute("aria-hidden", "true");
+      }
+    });
+  </script>
+
+</body>
+</html>
