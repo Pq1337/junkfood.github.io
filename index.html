@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JF1337</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet">
+    <link rel="icon" href="icon.ico" type="image/png">
+</head>
+
+<body>
+
+<audio id="bg-music" loop preload="metadata">
+    <!-- 你原本是 flac，type 建議寫 audio/flac -->
+    <source src="music disk.flac" type="audio/flac">
+</audio>
+
+<button id="music-btn" class="music-btn is-off">
+    <span class="label label-on">Music: ON</span>
+    <span class="label label-off">Music: OFF</span>
+</button>
+
+<!-- ✅ 新增：進度條 + 音量條 -->
+<div class="music-controls" id="music-controls">
+    <div class="row">
+        <span id="curTime">0:00</span>
+        <input id="progress" type="range" min="0" max="100" value="0" step="0.1" aria-label="music progress">
+        <span id="durTime">0:00</span>
+    </div>
+
+    <div class="row volume-row">
+        <span>🔈</span>
+        <input id="volume" type="range" min="0" max="1" value="1" step="0.01" aria-label="volume">
+        <span>🔊</span>
+    </div>
+</div>
+
+<video id="background-video" autoplay muted loop playsinline>
+    <source src="wallpaper1.mp4" type="video/mp4">
+</video>
+
+<div class="card">
+    <img src="avatar.png" class="avatar" alt="Avatar">
+    <h1 class="title">Here is the JF1337 official website</h1>
+    <p>Wanna Best Gaming Experience?</p>
+    <p>These three things are all you need!</p>
+
+    <ol class="brand-list">
+        <li>Game<span class="green">Sense</span></li>
+        <li>Never<span class="blue">Lose</span></li>
+        <li><span class="red">Fatality</span></li>
+    </ol>
+
+    <p>These are the best cheats for CS2.</p>
+
+    <div class="menu">
+        <a class="main-btn" href="#" onclick="return false;">For more information?</a>
+
+        <div class="sub-btns">
+            <a class="sub-btn gs" href="https://gamesense.pub" target="_blank">GameSense</a>
+            <a class="sub-btn nl" href="https://Neverlose.cc" target="_blank">Neverlose</a>
+            <a class="sub-btn fa" href="https://fatality.win" target="_blank">Fatality</a>
+        </div>
+    </div>
+</div>
+
+<div id="subtitleBox" class="subtitle-box hidden">
+    <span id="subtitleText"></span>
+</div>
+
+<footer class="footer">
+    © <span id="year"></span> JF1337
+</footer>
+
+<script>
+document.getElementById("year").textContent =
+    new Date().getFullYear();
+
+const music = document.getElementById("bg-music");
+const btn = document.getElementById("music-btn");
+
+const subtitleBox = document.getElementById("subtitleBox");
+const subtitleText = document.getElementById("subtitleText");
+
+const progress = document.getElementById("progress");
+const volume = document.getElementById("volume");
+const curTime = document.getElementById("curTime");
+const durTime = document.getElementById("durTime");
+
+let isPlaying = false;
+let lastLine = "";
+let isSeeking = false;
+
+// 你的字幕
+const subs = [
+    { start: 0.0, end: 4.5, text: "此歌曲為沒有填詞的純音樂，請您欣賞" },
+    { start: 4.5, end: 9.0, text: "Music brings the page to life." },
+    { start: 9.0, end: 195.0, text: "Enjoy :P" },
+];
+
+// 時間格式
+function fmt(t){
+    if(!isFinite(t)) return "0:00";
+    const m = Math.floor(t / 60);
+    const s = Math.floor(t % 60);
+    return `${m}:${String(s).padStart(2, "0")}`;
+}
+
+function setSubtitleSmooth(text){
+    if(text === lastLine) return;
+    lastLine = text;
+
+    subtitleText.classList.add("fading");
+    setTimeout(() => {
+        subtitleText.textContent = text;
+        subtitleText.classList.remove("fading");
+    }, 180);
+}
+
+function updateSubtitle(time){
+    const line = subs.find(s => time >= s.start && time < s.end);
+    if(line){
+        subtitleBox.classList.remove("hidden");
+        setSubtitleSmooth(line.text);
+    }else{
+        subtitleBox.classList.add("hidden");
+        lastLine = "";
+    }
+}
+
+// ✅ metadata 載入後顯示總長度
+music.addEventListener("loadedmetadata", () => {
+    durTime.textContent = fmt(music.duration);
+});
+
+// ✅ 音量條控制（保留你的 fadeIn/fadeOut，但音量條會調整「目標音量」）
+volume.addEventListener("input", () => {
+    // 當正在播放時，直接改當前音量
+    // 當還沒播放，先存著，按下播放後 fadeIn 會淡入到這個值
+    music.volume = Number(volume.value);
+});
+
+// 進度條拖曳
+progress.addEventListener("input", () => {
+    if(!music.duration) return;
+    isSeeking = true;
+    const t = (Number(progress.value) / 100) * music.duration;
+    curTime.textContent = fmt(t); // 拖曳時同步顯示時間
+});
+
+progress.addEventListener("change", () => {
+    if(!music.duration) return;
+    const t = (Number(progress.value) / 100) * music.duration;
+    music.currentTime = t;
+    isSeeking = false;
+});
+
+// ✅ timeupdate：更新字幕 + 進度條 + 當前時間
+music.addEventListener("timeupdate", () => {
+    if(isPlaying) updateSubtitle(music.currentTime);
+
+    if(!music.duration) return;
+
+    // 避免使用者正在拖曳時被 timeupdate 抢回去
+    if(!isSeeking){
+        const p = (music.currentTime / music.duration) * 100;
+        progress.value = p;
+    }
+    curTime.textContent = fmt(music.currentTime);
+});
+
+// ✅ 播放結束，復原狀態
+music.addEventListener("ended", () => {
+    isPlaying = false;
+    btn.classList.remove("is-on");
+    btn.classList.add("is-off");
+    subtitleBox.classList.add("hidden");
+    progress.value = 0;
+    curTime.textContent = "0:00";
+});
+
+// 淡入淡出（改成淡入到「音量條值」，不是固定 1）
+function fadeIn(){
+    const target = Number(volume.value);
+    music.volume = 0;
+    let v = 0;
+    const i = setInterval(() => {
+        v += 0.05;
+        if(v >= target){
+            v = target;
+            clearInterval(i);
+        }
+        music.volume = v;
+    }, 60);
+}
+
+function fadeOut(){
+    let v = music.volume;
+    const i = setInterval(() => {
+        v -= 0.05;
+        if(v <= 0){
+            v = 0;
+            clearInterval(i);
+            music.pause();
+        }
+        music.volume = v;
+    }, 60);
+}
+
+btn.addEventListener("click", async () => {
+    if(!isPlaying){
+        try{
+            await music.play();
+            fadeIn();
+            isPlaying = true;
+            btn.classList.remove("is-off");
+            btn.classList.add("is-on");
+        }catch(e){
+            console.log("Play blocked:", e);
+        }
+    }else{
+        fadeOut();
+        isPlaying = false;
+        btn.classList.remove("is-on");
+        btn.classList.add("is-off");
+        subtitleBox.classList.add("hidden");
+    }
+});
+</script>
+
+</body>
+</html>
