@@ -151,8 +151,6 @@ ol{
 .btn.gs{ box-shadow: inset 4px 0 0 rgba(0,255,120,0.9); }
 .btn.nl{ box-shadow: inset 4px 0 0 rgba(80,160,255,0.9); }
 .btn.fa{ box-shadow: inset 4px 0 0 rgba(255,80,80,0.9); }
-/* --- Expand Menu (fixed) --- */
-
 .menu{
   width: 260px;
   margin: 18px auto;
@@ -277,7 +275,6 @@ body {
 .music-btn:hover {
   background: rgba(255, 255, 255, 0.2);
 }
-/* footer 固定在最底 */
 .footer{
   position: fixed;
   left: 0;
@@ -491,3 +488,4 @@ body {
   color: #81b9fa;
   background: none;
 }
+
