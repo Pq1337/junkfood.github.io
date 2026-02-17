@@ -47,40 +47,45 @@
     <source src="wallpaper1.mp4" type="video/mp4" />
   </video>
   <div class="card">
-    <img src="avatar.png" class="avatar" alt="Avatar" />
+    <img src="avatar.png" class="avatar" id="cardAvatar" alt="Avatar" />
 
-    <h1 class="title">Welcome to ジャンクフード1337's official website</h1>
-    <h2 class="subtitle">I'll introduce myself?</h2>
+    <h1 class="title" id="cardName">Welcome to ジャンクフード1337's official website</h1>
+    <h2 class="subtitle" id="cardSubtitle">I'll introduce myself?</h2>
 
     <h2 class="introduction">👤 About Me</h2>
 
     <h3 class="section-title">1. Hobbies</h3>
-    <p class="section-text">hobbies? Nah, I just wanna lie on my cozy bed.</p>
+    <p class="section-text" id="cardHobby">hobbies? Nah, I just wanna lie on my cozy bed.</p>
 
     <h3 class="section-title">2. Skills</h3>
-    <p class="section-text">I can play a nice HvH game on my dogshit laptop with 30 FPS?</p>
+    <p class="section-text" id="cardSkills">I can play a nice HvH game on my dogshit laptop with 30 FPS?</p>
 
     <h3 class="section-title">3. Motto</h3>
-    <p class="del-one">Eat junk food, stay up late, and cheat in games.</p>
-    <p class="section-text">Trust in urself, u are the best!</p>
+    <p class="del-one" id="cardMotto1">Eat junk food, stay up late, and cheat in games.</p>
+    <p class="section-text" id="cardMotto2">Trust in urself, u are the best!</p>
 
     <h2 class="section-title">📬 Contact</h2>
 
     <div class="contact-grid">
       <div class="contact-box">
         <span class="contact-label">QQ:</span>
-        <span class="contact-value">2073095729</span>
+        <span class="contact-value" id="cardQQ">2073095729</span>
       </div>
 
       <div class="contact-box">
         <span class="contact-label">Email:</span>
-        <span class="contact-value">yzxdsb123@gmail.com</span>
+        <span class="contact-value" id="cardEmail">yzxdsb123@gmail.com</span>
       </div>
 
       <div class="contact-box">
         <span class="contact-label">Discord:</span>
-        <span class="contact-value">yyyuuu_38459</span>
+        <span class="contact-value" id="cardDiscord">yyyuuu_38459</span>
       </div>
+    </div>
+    <div class="side-switch" aria-hidden="false">
+      <button id="changePersonBtn" class="side-btn" type="button">
+        Change Person
+      </button>
     </div>
     <div class="extra-section">
       <button id="fmi-btn" class="fmi-btn" type="button">
@@ -88,12 +93,9 @@
         <span class="arrow">▼</span>
       </button>
       <div id="extra-content" class="extra-content" aria-hidden="true">
-        <a class="BL"
-           href="https://space.bilibili.com/391436861/upload/video"
-           target="_blank"
-           rel="noopener noreferrer">
-          Click here to visit my Bilibili channel
-        </a>
+        <a id ="cardBili" class="BL" target="_blank" rel="noopener noreferrer"></a>
+        <a id="cardIG" class="BL" target="_blank" rel="noopener noreferrer"></a>
+        <a id="cardX" class="BL" target="_blank" rel="noopener noreferrer"></a>
       </div>
     </div>
   </div>
@@ -453,6 +455,116 @@
         extraContent.setAttribute("aria-hidden", "true");
       }
     });
+const people = [
+  {
+    name: "ジャンクフード1337",
+    subtitle: "I'll introduce myself?",
+    hobby: "hobbies? Nah, I just wanna lie on my cozy bed.",
+    skills: "I can play a nice HvH game on my dogshit laptop with 30 FPS",
+    motto1: "Eat junk food, stay up late, and cheat in games.",
+    motto2: "Trust in urself, u are the best!",
+
+    qq: "2073095729",
+    email: "yzxdsb123@gmail.com",
+    discord: "yyyuuu_38459",
+    avatar: "avatar.png",
+    bilibili: "https://space.bilibili.com/391436861/upload/video",
+    instagram: "https://www.instagram.com/yzxdsb123/",
+    x: "https://x.com/mina1337skket"
+  },
+  {
+    name: "yazawasaki",
+    subtitle: "Kevin here. I speak Cantonese, Mandarin and some English.",
+    hobby: "Watching anime annnnnnnnnnnnnnnnnd like to play some dogshit cheats for CS2",
+    skills: "Still loading...",
+    motto1: "No cheat, no life.",
+    motto2: "私はhungryのネガだろ",
+    qq: "2141737297",
+    email: "ccxhb298@gmail.com",
+    discord: "ccxhb",
+    avatar: "avatar1.png",
+    bilibili: "https://space.bilibili.com/3493121857948256?spm_id_from=333.1007.0.0",
+    x: "https://x.com/YazawaSakicn"
+  },
+  {
+    name: "周防",
+    subtitle: "老傻子",
+    hobby: "喜欢唱跳rap打篮球",
+    skills: "Also nope",
+    motto1: "老傻子沒有座右铭",
+    qq: "1736867100",
+    email: "1736867100@qq.com",
+    discord: "adafsgf",
+    avatar: "avatar2.png",
+  }
+];
+
+let currentPersonIndex = 0;
+
+const card = document.querySelector(".card");
+const nameEl = document.getElementById("cardName");
+const subtitleEl = document.getElementById("cardSubtitle");
+const hobbyEl = document.getElementById("cardHobby");
+const skillsEl = document.getElementById("cardSkills");
+const motto1El = document.getElementById("cardMotto1");
+const motto2El = document.getElementById("cardMotto2");
+const qqEl = document.getElementById("cardQQ");
+const emailEl = document.getElementById("cardEmail");
+const discordEl = document.getElementById("cardDiscord");
+const avatarEl = document.getElementById("cardAvatar");
+const biliEl = document.getElementById("cardBili");
+const igEl = document.getElementById("cardIG");
+const xEl = document.getElementById("cardX");
+function renderPerson(index){
+  const p = people[index];
+  nameEl.textContent = `Welcome to ${p.name}'s Personal Introduction`;
+  subtitleEl.textContent = p.subtitle;
+  hobbyEl.textContent = p.hobby;
+  skillsEl.textContent = p.skills;
+  motto1El.textContent = p.motto1;
+  motto2El.textContent = p.motto2;
+  qqEl.textContent = p.qq;
+  emailEl.textContent = p.email;
+  discordEl.textContent = p.discord;  
+  avatarEl.src = p.avatar;
+  if (p.bilibili) {
+  biliEl.href = p.bilibili;
+  biliEl.textContent = "Visit Bilibili";
+  biliEl.style.display = "block";
+} else {
+  biliEl.style.display = "none";
+}
+
+if (p.instagram) {
+  igEl.href = p.instagram;
+  igEl.textContent = "Visit Instagram";
+  igEl.style.display = "block";
+} else {
+  igEl.style.display = "none";
+}
+
+if (p.x) {
+  xEl.href = p.x;
+  xEl.textContent = "Visit X";
+  xEl.style.display = "block";
+} else {
+  xEl.style.display = "none";
+}
+}
+
+document.getElementById("changePersonBtn").addEventListener("click", () => {
+  card.classList.add("fade");
+  avatarEl.classList.add("fade-avatar");
+
+  setTimeout(() => {
+    currentPersonIndex = (currentPersonIndex + 1) % people.length;
+    renderPerson(currentPersonIndex);
+    card.classList.remove("fade");
+    avatarEl.classList.remove("fade-avatar");
+  }, 200);
+});
+renderPerson(currentPersonIndex);
+
   </script>
 
 </body>
