@@ -46,6 +46,7 @@
   <video id="background-video" autoplay muted loop playsinline>
     <source src="wallpaper1.mp4" type="video/mp4" />
   </video>
+  <div class="card-wrap">
   <div class="card">
     <img src="avatar.png" class="avatar" id="cardAvatar" alt="Avatar" />
 
@@ -69,22 +70,22 @@
     <div class="contact-grid">
       <div class="contact-box">
         <span class="contact-label">QQ:</span>
-        <span class="contact-value" id="cardQQ">2073095729</span>
+        <span class="contact-value" id="cardQQ" title="點擊複製">2073095729</span>
       </div>
 
       <div class="contact-box">
         <span class="contact-label">Email:</span>
-        <span class="contact-value" id="cardEmail">yzxdsb123@gmail.com</span>
+        <span class="contact-value" id="cardEmail" title="點擊複製">yzxdsb123@gmail.com</span>
       </div>
 
       <div class="contact-box">
         <span class="contact-label">Discord:</span>
-        <span class="contact-value" id="cardDiscord">yyyuuu_38459</span>
+        <span class="contact-value" id="cardDiscord" title="點擊複製">yyyuuu_38459</span>
       </div>
     </div>
     <div class="side-switch" aria-hidden="false">
       <button id="changePersonBtn" class="side-btn" type="button">
-        Change Person
+        切換資料
       </button>
     </div>
     <div class="extra-section">
@@ -99,6 +100,7 @@
       </div>
     </div>
   </div>
+</div>
   <div id="subtitleBox" class="subtitle-box hidden">
     <span id="subtitleText"></span>
   </div>
@@ -474,7 +476,7 @@ const people = [
   },
   {
     name: "yazawasaki",
-    subtitle: "here is Kevin I’m a Cantonese not hongkongnese I know some English and Cantonese and if you want I can speak Mandarin for you",
+    subtitle: "here is Kevin I'm a Cantonese not hongkongnese I know some English and Cantonese and if you want I can speak Mandarin for you",
     hobby: "Watching anime annnnnnnnnnnnnnnnnd like to play some dogshit cheats for CS2",
     skills: "Still loading...",
     motto1: "No cheat, no life.",
@@ -502,6 +504,7 @@ const people = [
 let currentPersonIndex = 0;
 
 const card = document.querySelector(".card");
+const cardWrap = document.querySelector(".card-wrap");
 const nameEl = document.getElementById("cardName");
 const subtitleEl = document.getElementById("cardSubtitle");
 const hobbyEl = document.getElementById("cardHobby");
@@ -515,6 +518,21 @@ const avatarEl = document.getElementById("cardAvatar");
 const biliEl = document.getElementById("cardBili");
 const igEl = document.getElementById("cardIG");
 const xEl = document.getElementById("cardX");
+    function maskEmail(s){
+      const at = (s || "").indexOf("@");
+      if (at <= 1) return s || "";
+      const name = s.slice(0, at);
+      const domain = s.slice(at);
+      const keep = Math.min(2, name.length);
+      return name.slice(0, keep) + "•••" + domain;
+    }
+    function maskMiddle(s){
+      s = s || "";
+      if (s.length < 5) return s;
+      const keepL = 2, keepR = 2;
+      return s.slice(0, keepL) + "•••" + s.slice(-keepR);
+    }
+
 function renderPerson(index){
   const p = people[index];
   nameEl.textContent = `Welcome to ${p.name}'s Personal Introduction`;
@@ -523,9 +541,12 @@ function renderPerson(index){
   skillsEl.textContent = p.skills;
   motto1El.textContent = p.motto1;
   motto2El.textContent = p.motto2;
-  qqEl.textContent = p.qq;
-  emailEl.textContent = p.email;
-  discordEl.textContent = p.discord;  
+  qqEl.dataset.full = p.qq || "";
+  qqEl.textContent = maskMiddle(p.qq || "");
+  emailEl.dataset.full = p.email || "";
+  emailEl.textContent = maskEmail(p.email || "");
+  discordEl.dataset.full = p.discord || "";
+  discordEl.textContent = maskMiddle(p.discord || "");  
   avatarEl.src = p.avatar;
   if (p.bilibili) {
   biliEl.href = p.bilibili;
@@ -565,10 +586,59 @@ document.getElementById("changePersonBtn").addEventListener("click", () => {
 });
 renderPerson(currentPersonIndex);
 
-  </script>
+function maskEmail(s){
+  const at = s.indexOf("@");
+  if (at <= 1) return s;
+  const name = s.slice(0, at);
+  const domain = s.slice(at);
+  const keep = Math.min(2, name.length);
+  return name.slice(0, keep) + "•••" + domain;
+}
+function maskMiddle(s){
+  if (!s || s.length < 5) return s;
+  const keepL = 2, keepR = 2;
+  return s.slice(0, keepL) + "•••" + s.slice(-keepR);
+}
+function attachCopy(el, getFull){
+  if (!el) return;
+  el.style.cursor = "pointer";
+  el.addEventListener("click", async () => {
+    const text = (typeof getFull === "function" ? getFull() : el.dataset.full || el.textContent || "").trim();
+    if (!text) return;
+    try{
+      await navigator.clipboard.writeText(text);
+      const old = el.textContent;
+      el.textContent = "已複製 ✅";
+      setTimeout(() => { el.textContent = old; }, 650);
+    }catch(e){
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+    }
+  });
+}
+let mx = 0, my = 0, ticking = false;
+document.addEventListener("mousemove", (e) => {
+  mx = e.pageX; my = e.pageY;
+  if (ticking) return;
+  ticking = true;
+  requestAnimationFrame(() => {
+    const x = (window.innerWidth / 2 - mx) / 40;
+    const y = (window.innerHeight / 2 - my) / 40;
+    card.style.setProperty("--rx", `${y}deg`);
+    card.style.setProperty("--ry", `${-x}deg`);
+    ticking = false;
+  });
+});
+attachCopy(qqEl, () => people[currentPersonIndex]?.qq || qqEl.dataset.full || qqEl.textContent);
+attachCopy(emailEl, () => people[currentPersonIndex]?.email || emailEl.dataset.full || emailEl.textContent);
+attachCopy(discordEl, () => people[currentPersonIndex]?.discord || discordEl.dataset.full || discordEl.textContent);
+
+</script>
 
 </body>
 </html>
-
-
 
