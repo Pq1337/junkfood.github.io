@@ -220,7 +220,7 @@ p {
     margin: 50px 0;
 }
 body {
-    min-height: 150vh;
+    min-height: 180vh;
 }
 .green {
     color: #2fbd71;
@@ -488,4 +488,73 @@ body {
   color: #81b9fa;
   background: none;
 }
+.card.fade {
+  opacity: 0;
+  transform: translateY(10px);
+}
+.card {
+  transition: opacity .3s ease, transform .3s ease;
+}
+.card{
+  position: relative;
+}
+.side-switch{
+  position: absolute;
+  top: 3%;
+  right: 38%;
+  transform: translate(60px, -50%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform .25s ease, opacity .2s ease;
+  z-index: 5;
+}
 
+.card:hover .side-switch,
+.side-switch:hover{
+  transform: translate(0, -50%);
+  opacity: 1;
+  pointer-events: auto;
+}
+.side-btn{
+  height: 40px;
+  min-width: 92px;
+  padding: 0 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.10);
+  color: white;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: transform .12s ease, background .25s ease, border-color .25s ease;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.25);
+}
+
+.side-btn:hover{
+  background: rgba(255,255,255,0.18);
+  transform: translateY(-2px);
+}
+
+.side-btn:active{
+  transform: scale(0.96);
+}
+@media (max-width: 768px){
+  .side-switch{
+    transform: translate(0, -50%);
+    opacity: 1;
+    pointer-events: auto;
+    right: 10px;
+  }
+}
+.avatar.fade-avatar{
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.avatar{
+  transition: opacity .25s ease, transform .25s ease;
+}
+#extra-content a{
+  display: block;
+  margin: 8px 0;
+  text-align: center;
+}
