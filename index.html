@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>JF1337</title>
+  <title>ジャンクフード1337</title>
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet" />
   <link rel="icon" href="icon.ico" type="image/png" />
@@ -132,6 +132,52 @@
     const arrow = document.querySelector(".arrow");
 
     document.getElementById("year").textContent = new Date().getFullYear();
+    async function parseLRC(url) {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`Failed to fetch LRC: ${url} (${res.status})`);
+      const text = await res.text();
+
+      const lines = text.split(/\r?\n/);
+      const entries = [];
+      for (let raw of lines) {
+        const line = (raw || "").trim();
+        if (!line) continue;
+
+        const timeTags = [...line.matchAll(/\[(\d+):(\d+(?:\.\d+)?)\]/g)];
+        if (!timeTags.length) continue;
+
+        const content = line.replace(/\[(\d+):(\d+(?:\.\d+)?)\]/g, "").trim();
+        for (const m of timeTags) {
+          const min = parseInt(m[1], 10);
+          const sec = parseFloat(m[2]);
+          const t = min * 60 + sec;
+          entries.push({ time: t, text: content });
+        }
+      }
+
+      entries.sort((a, b) => a.time - b.time);
+
+      const subs = entries.map((item, i) => ({
+        start: item.time,
+        end: entries[i + 1] ? entries[i + 1].time : item.time + 5,
+        text: item.text || "…"
+      }));
+
+      return subs;
+    }
+
+    async function getSubsForTrack(track) {
+      if (track && track.lrc) {
+        try {
+          return await parseLRC(track.lrc);
+        } catch (e) {
+          console.warn("LRC load failed, fallback to built-in subs:", e);
+          return track.subs || [];
+        }
+      }
+      return (track && track.subs) ? track.subs : [];
+    }
+
     const playlist = [
       {
         title: "Si Tu Vois Ma Mère",
@@ -178,6 +224,12 @@
           { start: 9.0, end: 14.0, text: "Enjoy :P" },
         ],
       },
+      {
+        title: "Beyond - 不再猶豫",
+        src: "music7.ogg",
+        lrc: "不再犹豫_edited.lrc"
+      },
+
     ];
 
     let isPlaying = false;
@@ -187,7 +239,7 @@
 
     let currentIndex = 0;
     let shuffleBag = [];
-    let currentSubs = playlist[0].subs;
+    let currentSubs = [];
     let lastLine = "";
 
     function fmt(t) {
@@ -268,7 +320,7 @@
       currentIndex = index;
 
       const track = playlist[currentIndex];
-      currentSubs = track.subs || [];
+      currentSubs = await getSubsForTrack(track);
 
       nowPlaying.textContent = `Now Playing: ${track.title}`;
       const targetVol = Number(volume.value);
