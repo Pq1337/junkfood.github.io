@@ -132,7 +132,7 @@
     const arrow = document.querySelector(".arrow");
 
     document.getElementById("year").textContent = new Date().getFullYear();
-    async function parseLRC(url) {
+    async function parseLRC(url, offset = 0) {
       const res = await fetch(url);
       if (!res.ok) throw new Error(`Failed to fetch LRC: ${url} (${res.status})`);
       const text = await res.text();
@@ -150,7 +150,7 @@
         for (const m of timeTags) {
           const min = parseInt(m[1], 10);
           const sec = parseFloat(m[2]);
-          const t = min * 60 + sec;
+          const t = Math.max(0, min * 60 + sec + offset);
           entries.push({ time: t, text: content });
         }
       }
@@ -169,7 +169,7 @@
     async function getSubsForTrack(track) {
       if (track && track.lrc) {
         try {
-          return await parseLRC(track.lrc);
+          return await parseLRC(track.lrc, Number(track.offset || 0));
         } catch (e) {
           console.warn("LRC load failed, fallback to built-in subs:", e);
           return track.subs || [];
@@ -228,7 +228,23 @@
         title: "Beyond - 不再猶豫",
         src: "music7.ogg",
         lrc: "不再犹豫_edited.lrc"
+		offset: -2.0
       },
+	  {
+	    title: "罗大佑 - 飛車",
+		src: "music8.mp3",
+		lrc: "飞车.lrc"
+	  },
+	  {
+	    title: "罗大佑/蒋志光 - 皇后大道东",
+		src: "music9.mp3",
+		lrc: "皇后大道东.lrc"
+	  },
+	  {
+	    title: "罗大佑 - 首都",
+		src: "music10.mp3",
+		lrc: "首都.lrc"
+	  },
 
     ];
 
