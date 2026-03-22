@@ -440,3 +440,262 @@ html, body{
   background: rgba(120,255,180,0.18);
   border-color: rgba(120,255,180,0.35);
 }
+
+.chat-launcher {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(120, 180, 255, 0.25);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(12px);
+  color: white;
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1000;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.3s ease;
+}
+
+.chat-launcher:hover {
+  transform: scale(1.1) rotate(5deg);
+  background: rgba(120, 180, 255, 0.4);
+}
+
+.chat-window {
+  position: fixed;
+  bottom: 100px;
+  right: 30px;
+  width: min(350px, 90vw);
+  height: 500px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  z-index: 999;
+  box-shadow: var(--shadow-soft);
+  transform: translateY(20px) scale(0.9);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.chat-window.active {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.chat-header {
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--glass-border);
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chat-messages {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.2) transparent;
+}
+
+.message {
+  padding: 10px 14px;
+  border-radius: 15px;
+  font-size: 14px;
+  max-width: 85%;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+.message.user {
+  align-self: flex-end;
+  background: rgba(120, 180, 255, 0.3);
+  border: 1px solid rgba(120, 180, 255, 0.3);
+  color: white;
+  border-bottom-right-radius: 2px;
+}
+
+.message.ai {
+  align-self: flex-start;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--glass-border);
+  color: rgba(255, 255, 255, 0.9);
+  border-bottom-left-radius: 2px;
+}
+
+.chat-input-area {
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.2);
+  display: flex;
+  gap: 8px;
+}
+
+.chat-input-area input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  padding: 8px 12px;
+  color: white;
+  font-family: inherit;
+  outline: none;
+}
+
+.chat-input-area button {
+  background: rgba(120, 255, 180, 0.2);
+  border: 1px solid rgba(120, 255, 180, 0.3);
+  color: white;
+  padding: 0 15px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.chat-input-area button:hover {
+  background: rgba(120, 255, 180, 0.4);
+}
+
+.chat-messages::-webkit-scrollbar {
+  width: 5px;
+}
+.chat-messages::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+
+/* 聊天發起按鈕：確保在最右下角 */
+.chat-launcher {
+  position: fixed;
+  bottom: 20px; /* 距離底部距離 */
+  right: 20px;  /* 距離右側距離 */
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(120, 180, 255, 0.4); /* 稍微調深一點比較好找 */
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(12px);
+  color: white;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2000; /* 提高層級，確保在音樂控制條之上 */
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+/* 聊天視窗：顯示在按鈕上方 */
+.chat-window {
+  position: fixed;
+  bottom: 80px; /* 避開按鈕的位置 */
+  right: 20px;
+  width: min(320px, 85vw);
+  height: 450px;
+  background: rgba(20, 20, 20, 0.6); /* 背景深一點字比較清楚 */
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(25px);
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  z-index: 1999;
+  box-shadow: var(--shadow-soft);
+  
+  /* 隱藏狀態 */
+  transform: translateY(20px) scale(0.9);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.chat-launcher {
+  position: fixed !important; /* 強制固定定位 */
+  bottom: 25px !important;    /* 距離底部再遠一點 */
+  right: 25px !important;     /* 距離右側再遠一點 */
+  
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  
+  /* 確保顏色與背景有對比 */
+  background: rgba(80, 150, 255, 0.6) !important; 
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  backdrop-filter: blur(15px);
+  
+  /* 絕對最高層級 */
+  z-index: 99999 !important; 
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+/* 確保對話視窗也在最上層 */
+.chat-window {
+  z-index: 99998 !important;
+  bottom: 90px !important;
+  right: 25px !important;
+}
+
+.message.ai {
+  /* 讓文字換行更自然 */
+  white-space: pre-wrap; 
+  word-break: break-word;
+  /* 加入一個微小的閃爍或動畫效果（選配） */
+  border-left: 2px solid rgba(120, 255, 180, 0.5);
+  padding-left: 12px;
+}
+/* --- 訊息氣泡彈出動畫 --- */
+@keyframes messagePopIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.8); /* 從下方 20px、縮小狀態開始 */
+  }
+  70% {
+    transform: translateY(-2px) scale(1.02); /* 稍微飛過頭，建立彈性感 */
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1); /* 回到原位 */
+  }
+}
+
+/* 幫所有的 message 加上動畫基礎設定 */
+.message {
+  /* ... 你原本的樣式 ... */
+  
+  /* 加上這兩行 */
+  animation: messagePopIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: transform, opacity; /* 優化效能 */
+}
+
+/* 為了讓使用者訊息和 AI 訊息有不同的感覺（選配） */
+.message.user {
+  transform-origin: right bottom; /* 從右下角彈出 */
+}
+
+.message.ai {
+  transform-origin: left bottom; /* 從左下角彈出 */
+  
+  /* 修正原本 CSS 裡的 white-space，讓換行更自然 */
+  white-space: pre-wrap; 
+  word-break: break-word;
+}
