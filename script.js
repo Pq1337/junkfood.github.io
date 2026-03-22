@@ -29,7 +29,7 @@ const chatMessages = document.getElementById('chatMessages');
 
 document.getElementById("year").textContent = new Date().getFullYear();
 
-// --- 音樂功能邏輯 ---
+// --- 歌詞解析 ---
 async function parseLRC(url, offset = 0) {
     const res = await fetch(url);
     if (!res.ok) throw new Error(`Failed to fetch LRC: ${url} (${res.status})`);
@@ -138,10 +138,6 @@ function refillShuffleBag() {
         const j = Math.floor(Math.random() * (i + 1));
         [shuffleBag[i], shuffleBag[j]] = [shuffleBag[j], shuffleBag[i]];
     }
-    if (playlist.length > 1 && shuffleBag[0] === currentIndex) {
-        const k = shuffleBag.findIndex(x => x !== currentIndex);
-        if (k > 0) [shuffleBag[0], shuffleBag[k]] = [shuffleBag[k], shuffleBag[0]];
-    }
 }
 
 function pickNextIndex(direction = +1) {
@@ -202,7 +198,7 @@ function syncRepeatUI() {
     repeatBtn.textContent = repeatMode === 2 ? "🔂" : "🔁";
 }
 
-// --- 事件處理 ---
+// --- 音樂事件 ---
 const savedVol = localStorage.getItem("vol");
 if (savedVol !== null) { volume.value = savedVol; music.volume = Number(savedVol); }
 else { music.volume = Number(volume.value); }
@@ -272,6 +268,7 @@ prevBtn.addEventListener("click", () => loadTrack(pickNextIndex(-1), { autoplay:
 shuffleBtn.addEventListener("click", () => { shuffleOn = !shuffleOn; if (shuffleOn) refillShuffleBag(); syncShuffleUI(); });
 repeatBtn.addEventListener("click", () => { repeatMode = (repeatMode + 1) % 3; syncRepeatUI(); });
 
+// ✨ 修復 FMI 按鈕
 fmiBtn.addEventListener("click", () => {
     extraContent.classList.toggle("show");
     arrow.classList.toggle("rotate");
@@ -307,10 +304,14 @@ function renderPerson(index) {
     
     const b = document.getElementById("cardBili"), i = document.getElementById("cardIG"), x = document.getElementById("cardX");
     b.href = p.bilibili || "#"; b.style.display = p.bilibili ? "block" : "none";
+    b.textContent = "Visit Bilibili";
     i.href = p.instagram || "#"; i.style.display = p.instagram ? "block" : "none";
+    i.textContent = "Visit Instagram";
     x.href = p.x || "#"; x.style.display = p.x ? "block" : "none";
+    x.textContent = "Visit X";
 }
 
+// ✨ 修復切換資料按鈕
 document.getElementById("changePersonBtn").addEventListener("click", () => {
     cardUI.classList.add("fade");
     avatarEl.classList.add("fade-avatar");
@@ -320,6 +321,45 @@ document.getElementById("changePersonBtn").addEventListener("click", () => {
         cardUI.classList.remove("fade");
         avatarEl.classList.remove("fade-avatar");
     }, 200);
+});
+
+// ✨ 修復點擊複製功能
+function attachCopy(id, type) {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.style.cursor = "pointer";
+    el.addEventListener("click", async () => {
+        const text = people[currentPersonIndex][type];
+        await navigator.clipboard.writeText(text);
+        const oldText = el.textContent;
+        el.textContent = "已複製 ✅";
+        setTimeout(() => { el.textContent = oldText; }, 650);
+    });
+}
+attachCopy("cardQQ", "qq");
+attachCopy("cardEmail", "email");
+attachCopy("cardDiscord", "discord");
+
+// ✨ 修復滑鼠跟隨卡片 3D 特效
+let mx = 0, my = 0, ticking = false;
+document.addEventListener("mousemove", (e) => {
+    mx = e.pageX; my = e.pageY;
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+        if (cardUI) {
+            // 計算旋轉角度
+            const rect = cardUI.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const rotateX = (centerY - my) / 25;
+            const rotateY = -(centerX - mx) / 25;
+
+            cardUI.style.setProperty("--rx", `${rotateX}deg`);
+            cardUI.style.setProperty("--ry", `${rotateY}deg`);
+        }
+        ticking = false;
+    });
 });
 
 // --- 聊天室功能 ---
@@ -342,7 +382,14 @@ async function callDeepSeekStream(userMsg) {
         const response = await fetch(URL, {
             method: "POST",
             headers: { "Content-Type": "application/json", "Authorization": `Bearer ${API_KEY}` },
-            body: JSON.stringify({ model: "deepseek-chat", messages: [{ role: "system", content: "你是一個網頁助手，說話幽默風趣，使用正體中文。" }, { role: "user", content: userMsg }], stream: true })
+            body: JSON.stringify({ 
+                model: "deepseek-chat", 
+                messages: [
+                    { role: "system", content: "你是一個網頁助手，說話幽默風趣，使用正體中文。" }, 
+                    { role: "user", content: userMsg }
+                ], 
+                stream: true 
+            })
         });
 
         if (!response.ok) throw new Error("API 請求失敗");
@@ -364,15 +411,17 @@ async function callDeepSeekStream(userMsg) {
             const lines = chunkValue.split("\n");
             for (const line of lines) {
                 if (line.startsWith("data: ") && line !== "data: [DONE]") {
-                    const jsonData = JSON.parse(line.substring(6));
-                    const content = jsonData.choices[0].delta.content || "";
-                    aiMsgDiv.textContent += content;
-                    
-                    const now = Date.now();
-                    if (now - lastScrollTime > 50) {
-                        chatMessages.scrollTop = chatMessages.scrollHeight;
-                        lastScrollTime = now;
-                    }
+                    try {
+                        const jsonData = JSON.parse(line.substring(6));
+                        const content = jsonData.choices[0].delta.content || "";
+                        aiMsgDiv.textContent += content;
+                        
+                        const now = Date.now();
+                        if (now - lastScrollTime > 50) {
+                            chatMessages.scrollTop = chatMessages.scrollHeight;
+                            lastScrollTime = now;
+                        }
+                    } catch (e) {}
                 }
             }
         }
@@ -395,3 +444,6 @@ chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSen
 
 // 初始化
 renderPerson(0);
+syncUIPlaying(false);
+syncShuffleUI();
+syncRepeatUI();
