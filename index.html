@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ジャンクフード1337</title>
   <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap" rel="stylesheet" />
-  <link rel="icon" href="icon.ico" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" href="icon.ico" type="image/x-icon" />
 </head>
 
 <body>
@@ -72,17 +74,17 @@
     <div class="contact-grid">
       <div class="contact-box">
         <span class="contact-label">QQ:</span>
-        <span class="contact-value" id="cardQQ" title="點擊複製">2073095729</span>
+        <button class="contact-value" id="cardQQ" type="button" title="點擊複製">2073095729</button>
       </div>
 
       <div class="contact-box">
         <span class="contact-label">Email:</span>
-        <span class="contact-value" id="cardEmail" title="點擊複製">yzxdsb123@gmail.com</span>
+        <button class="contact-value" id="cardEmail" type="button" title="點擊複製">yzxdsb123@gmail.com</button>
       </div>
 
       <div class="contact-box">
         <span class="contact-label">Discord:</span>
-        <span class="contact-value" id="cardDiscord" title="點擊複製">yyyuuu_38459</span>
+        <button class="contact-value" id="cardDiscord" type="button" title="點擊複製">yyyuuu_38459</button>
       </div>
     </div>
     <div class="side-switch" aria-hidden="false">
@@ -91,7 +93,7 @@
       </button>
     </div>
     <div class="extra-section">
-      <button id="fmi-btn" class="fmi-btn" type="button">
+      <button id="fmi-btn" class="fmi-btn" type="button" aria-expanded="false" aria-controls="extra-content">
         For More Information
         <span class="arrow">▼</span>
       </button>
@@ -110,19 +112,19 @@
   <footer class="footer">
     © <span id="year"></span> JF1337
   </footer>
-  <div id="chatLauncher" class="chat-launcher">💬</div>
+  <button id="chatLauncher" class="chat-launcher" type="button" aria-label="開啟 AI 助手" aria-expanded="false" aria-controls="chatWindow">💬</button>
 
-<div id="chatWindow" class="chat-window">
+<div id="chatWindow" class="chat-window" role="dialog" aria-modal="true" aria-labelledby="chatTitle" aria-hidden="true">
   <div class="chat-header">
-    <span>AI Assistant</span>
-    <button id="closeChat" style="background:none; border:none; color:white; cursor:pointer;">✕</button>
+    <span id="chatTitle">AI Assistant</span>
+    <button id="closeChat" class="chat-close" type="button" aria-label="關閉 AI 助手">✕</button>
   </div>
   <div id="chatMessages" class="chat-messages">
     <div class="message ai">你好！有什麼我可以幫你的嗎？</div>
   </div>
   <div class="chat-input-area">
-    <input type="text" id="chatInput" placeholder="輸入訊息...">
-    <button id="sendBtn">發送</button>
+    <input type="text" id="chatInput" placeholder="輸入訊息..." aria-label="聊天訊息">
+    <button id="sendBtn" type="button">發送</button>
   </div>
 </div>
   <script src="script.js"></script>
