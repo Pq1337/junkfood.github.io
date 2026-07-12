@@ -183,6 +183,8 @@ async function loadTrack(index, { autoplay = false, keepTime = false } = {}) {
 }
 
 function syncUIPlaying(on) {
+    bigBtn.setAttribute("aria-pressed", String(on));
+    playBtn.setAttribute("aria-pressed", String(on));
     if (on) {
         bigBtn.classList.replace("is-off", "is-on");
         playBtn.textContent = "⏸";
@@ -192,10 +194,15 @@ function syncUIPlaying(on) {
     }
 }
 
-function syncShuffleUI() { shuffleBtn.classList.toggle("on", shuffleOn); }
+function syncShuffleUI() {
+    shuffleBtn.classList.toggle("on", shuffleOn);
+    shuffleBtn.setAttribute("aria-pressed", String(shuffleOn));
+}
 function syncRepeatUI() {
     repeatBtn.classList.toggle("on", repeatMode !== 0);
     repeatBtn.textContent = repeatMode === 2 ? "🔂" : "🔁";
+    repeatBtn.setAttribute("aria-pressed", String(repeatMode !== 0));
+    repeatBtn.setAttribute("aria-label", repeatMode === 2 ? "repeat current track" : "repeat playlist");
 }
 
 // --- 音樂事件 ---
@@ -270,15 +277,16 @@ repeatBtn.addEventListener("click", () => { repeatMode = (repeatMode + 1) % 3; s
 
 // ✨ 修復 FMI 按鈕
 fmiBtn.addEventListener("click", () => {
-    extraContent.classList.toggle("show");
+    const isOpen = extraContent.classList.toggle("show");
     arrow.classList.toggle("rotate");
-    extraContent.style.maxHeight = extraContent.classList.contains("show") ? extraContent.scrollHeight + "px" : "0";
+    extraContent.setAttribute("aria-hidden", String(!isOpen));
+    fmiBtn.setAttribute("aria-expanded", String(isOpen));
 });
 
 // --- 人物資料 ---
 const people = [
     { name: "ジャンクフード1337", subtitle: "I'll introduce myself?", hobby: "hobbies? Nah, I just wanna lie on my cozy bed.", skills: "I can play a nice HvH game on my dogshit laptop with 30 FPS", motto1: "Eat junk food, stay up late, and cheat in games.", motto2: "Trust in urself, u are the best!", qq: "2073095729", email: "yzxdsb123@gmail.com", discord: "yyyuuu_38459", avatar: "avatar.png", bilibili: "https://space.bilibili.com/391436861/upload/video", instagram: "https://www.instagram.com/yzxdsb123/", x: "https://x.com/Mina1337skeet" },
-    { name: "yazawasaki", subtitle: "here is Kevin I'm a Cantonese...", hobby: "Watching anime...", skills: "Still loading...", motto1: "No cheat, no life.", motto2: "私はhungryのネガだろ", qq: "2141737297", email: "ccxhb298@gmail.com", discord: "ccxhb", avatar: "avatar1.png", bilibili: "https://space.bilibili.com/3493121857948256", x: "https://x.com/YazawaSakicn" },
+    { name: "yazawasaki", subtitle: "here is Kevin I’m a Cantonese not hongkongnese I know some English and Cantonese and if you want I can speak Mandarin", hobby: "Watching animes and play some dog shit cheats", skills: "Still loading...", motto1: "No cheat, no life.", motto2: "私はhungryのネガだろ", qq: "2141737297", email: "ccxhb298@gmail.com", discord: "ccxhb", avatar: "avatar1.png", bilibili: "https://space.bilibili.com/3493121857948256", x: "https://x.com/YazawaSakicn" },
     { name: "周防", subtitle: "老傻子", hobby: "喜欢唱跳rap打篮球", skills: "Also nope", motto1: "老傻子沒有座右铭", qq: "1736867100", email: "1736867100@qq.com", discord: "adafsgf", avatar: "avatar2.png" }
 ];
 
@@ -303,11 +311,11 @@ function renderPerson(index) {
     avatarEl.src = p.avatar;
     
     const b = document.getElementById("cardBili"), i = document.getElementById("cardIG"), x = document.getElementById("cardX");
-    b.href = p.bilibili || "#"; b.style.display = p.bilibili ? "block" : "none";
+    b.href = p.bilibili || "#"; b.style.display = p.bilibili ? "inline-flex" : "none";
     b.textContent = "Visit Bilibili";
-    i.href = p.instagram || "#"; i.style.display = p.instagram ? "block" : "none";
+    i.href = p.instagram || "#"; i.style.display = p.instagram ? "inline-flex" : "none";
     i.textContent = "Visit Instagram";
-    x.href = p.x || "#"; x.style.display = p.x ? "block" : "none";
+    x.href = p.x || "#"; x.style.display = p.x ? "inline-flex" : "none";
     x.textContent = "Visit X";
 }
 
@@ -352,8 +360,9 @@ document.addEventListener("mousemove", (e) => {
             const rect = cardUI.getBoundingClientRect();
             const centerX = rect.left + rect.width / 2;
             const centerY = rect.top + rect.height / 2;
-            const rotateX = (centerY - my) / 25;
-            const rotateY = -(centerX - mx) / 25;
+            const maxTilt = 4.5;
+            const rotateX = Math.max(-maxTilt, Math.min(maxTilt, (centerY - my) / 55));
+            const rotateY = Math.max(-maxTilt, Math.min(maxTilt, -(centerX - mx) / 55));
 
             cardUI.style.setProperty("--rx", `${rotateX}deg`);
             cardUI.style.setProperty("--ry", `${rotateY}deg`);
@@ -363,8 +372,22 @@ document.addEventListener("mousemove", (e) => {
 });
 
 // --- 聊天室功能 ---
-launcher.addEventListener('click', () => windowEl.classList.add('active'));
-closeBtn.addEventListener('click', () => windowEl.classList.remove('active'));
+let chatBusy = false;
+let chatController = null;
+
+function setChatOpen(open) {
+    windowEl.classList.toggle('active', open);
+    windowEl.setAttribute('aria-hidden', String(!open));
+    launcher.setAttribute('aria-expanded', String(open));
+    if (open) chatInput.focus();
+    else launcher.focus();
+}
+
+launcher.addEventListener('click', () => setChatOpen(true));
+closeBtn.addEventListener('click', () => setChatOpen(false));
+windowEl.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') setChatOpen(false);
+});
 
 function addMessage(role, text) {
     const msgDiv = document.createElement('div');
@@ -375,24 +398,19 @@ function addMessage(role, text) {
 }
 
 async function callDeepSeekStream(userMsg) {
-    const API_KEY = "sk-469e3d3c1cfc466dba0a26b54a6ac65c";
-    const URL = "https://api.deepseek.com/chat/completions";
-
+    chatController = new AbortController();
     try {
-        const response = await fetch(URL, {
+        const response = await fetch('/api/chat', {
             method: "POST",
-            headers: { "Content-Type": "application/json", "Authorization": `Bearer ${API_KEY}` },
-            body: JSON.stringify({ 
-                model: "deepseek-chat", 
-                messages: [
-                    { role: "system", content: "你是一個網頁助手，說話幽默風趣，使用正體中文。" }, 
-                    { role: "user", content: userMsg }
-                ], 
-                stream: true 
-            })
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: userMsg }),
+            signal: chatController.signal
         });
 
-        if (!response.ok) throw new Error("API 請求失敗");
+        if (!response.ok) {
+            const detail = await response.json().catch(() => ({}));
+            throw new Error(detail.error || `API 請求失敗 (${response.status})`);
+        }
 
         const aiMsgDiv = document.createElement('div');
         aiMsgDiv.className = 'message ai';
@@ -402,18 +420,19 @@ async function callDeepSeekStream(userMsg) {
         const reader = response.body.getReader();
         const decoder = new TextDecoder("utf-8");
         let lastScrollTime = 0;
+        let buffer = "";
 
         while (true) {
             const { value, done } = await reader.read();
-            if (done) break;
-            
-            const chunkValue = decoder.decode(value);
-            const lines = chunkValue.split("\n");
+            buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+            const lines = buffer.split("\n");
+            buffer = done ? "" : lines.pop();
             for (const line of lines) {
-                if (line.startsWith("data: ") && line !== "data: [DONE]") {
+                const payload = line.startsWith("data: ") ? line.slice(6).trim() : "";
+                if (payload && payload !== "[DONE]") {
                     try {
-                        const jsonData = JSON.parse(line.substring(6));
-                        const content = jsonData.choices[0].delta.content || "";
+                        const jsonData = JSON.parse(payload);
+                        const content = jsonData.choices?.[0]?.delta?.content || "";
                         aiMsgDiv.textContent += content;
                         
                         const now = Date.now();
@@ -421,26 +440,39 @@ async function callDeepSeekStream(userMsg) {
                             chatMessages.scrollTop = chatMessages.scrollHeight;
                             lastScrollTime = now;
                         }
-                    } catch (e) {}
+                    } catch (error) {
+                        console.warn("忽略無法解析的串流資料", error);
+                    }
                 }
             }
+            if (done) break;
         }
         chatMessages.scrollTop = chatMessages.scrollHeight;
     } catch (error) {
-        addMessage('ai', "連線失敗...");
+        if (error.name !== 'AbortError') addMessage('ai', error.message || "連線失敗...");
+    } finally {
+        chatController = null;
     }
 }
 
 async function handleSend() {
     const text = chatInput.value.trim();
-    if (!text) return;
+    if (!text || chatBusy) return;
+    chatBusy = true;
+    sendBtn.disabled = true;
     addMessage('user', text);
     chatInput.value = '';
-    await callDeepSeekStream(text);
+    try {
+        await callDeepSeekStream(text);
+    } finally {
+        chatBusy = false;
+        sendBtn.disabled = false;
+        chatInput.focus();
+    }
 }
 
 sendBtn.addEventListener('click', handleSend);
-chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSend(); });
+chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSend(); });
 
 // 初始化
 renderPerson(0);
