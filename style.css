@@ -374,6 +374,60 @@ a {
   cursor: pointer;
 }
 
+.group-promo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 16px;
+  padding: 18px 20px;
+  border: 1px solid rgba(126, 179, 255, .2);
+  border-radius: 18px;
+  background: linear-gradient(110deg, rgba(126,179,255,.13), rgba(181,156,255,.1) 58%, rgba(117,240,199,.08));
+  box-shadow: inset 0 1px rgba(255,255,255,.045);
+}
+
+.group-promo-copy { min-width: 0; }
+.group-kicker {
+  color: var(--blue);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .16em;
+}
+.group-title {
+  margin: 5px 0 3px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+}
+.group-number { color: var(--muted); font-size: 12px; }
+.group-number strong { color: #e6eaf4; font-variant-numeric: tabular-nums; letter-spacing: .04em; }
+.group-copy {
+  flex: 0 0 auto;
+  min-height: 40px;
+  padding: 0 15px;
+  border: 1px solid rgba(117,240,199,.28);
+  border-radius: 12px;
+  background: rgba(117,240,199,.12);
+  color: var(--mint);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .18s ease, background .18s ease, border-color .18s ease;
+}
+.group-copy:hover { transform: translateY(-1px); background: rgba(117,240,199,.19); border-color: rgba(117,240,199,.48); }
+.group-copy:active { transform: scale(.97); }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
 .side-switch {
   position: absolute;
   top: 22px;
@@ -499,7 +553,7 @@ a {
 /* Lyrics */
 .subtitle-box {
   position: fixed;
-  bottom: 26px;
+  bottom: 90px;
   left: 50%;
   z-index: 20;
   width: fit-content;
@@ -642,6 +696,9 @@ a {
   .contact-grid { grid-template-columns: 1fr; }
   .contact-box { display: flex; align-items: center; justify-content: space-between; }
   .contact-label { margin: 0; }
+  .group-promo { gap: 12px; padding: 16px; }
+  .group-title { font-size: 13px; }
+  .group-copy { padding: 0 12px; }
   .extra-content { flex-wrap: wrap; }
   .chat-window { right: 16px; bottom: 82px; }
   .chat-launcher { right: 16px; bottom: 16px; }
