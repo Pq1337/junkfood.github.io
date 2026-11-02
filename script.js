@@ -348,6 +348,22 @@ attachCopy("cardQQ", "qq");
 attachCopy("cardEmail", "email");
 attachCopy("cardDiscord", "discord");
 
+const copyGroupBtn = document.getElementById("copyGroupBtn");
+const groupCopyStatus = document.getElementById("groupCopyStatus");
+copyGroupBtn.addEventListener("click", async () => {
+    try {
+        await navigator.clipboard.writeText("652169588");
+        groupCopyStatus.textContent = "QQ群号已复制";
+        copyGroupBtn.textContent = "已复制";
+    } catch (error) {
+        groupCopyStatus.textContent = "复制失败，请手动复制群号 652169588";
+        copyGroupBtn.textContent = "请手动复制";
+    }
+    setTimeout(() => {
+        copyGroupBtn.textContent = "复制群号";
+    }, 1600);
+});
+
 // ✨ 修復滑鼠跟隨卡片 3D 特效
 let mx = 0, my = 0, ticking = false;
 document.addEventListener("mousemove", (e) => {
@@ -378,6 +394,7 @@ let chatController = null;
 function setChatOpen(open) {
     windowEl.classList.toggle('active', open);
     windowEl.setAttribute('aria-hidden', String(!open));
+    windowEl.inert = !open;
     launcher.setAttribute('aria-expanded', String(open));
     if (open) chatInput.focus();
     else launcher.focus();
